@@ -1,1 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "char-tokenizer"
+version = "0.1.0"
+description = "Character-level tokenizer for NLP tasks"
+authors = [
+  { name="Rabie Otoum", email="rabie.amin.otoum@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+  "pandas>=1.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/rabie-amin/char_tokenizer_pkg"
 
