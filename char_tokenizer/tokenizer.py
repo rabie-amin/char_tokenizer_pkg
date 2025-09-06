@@ -1,6 +1,7 @@
 # char_tokenizer/tokenizer.py
 import json
-from typing import List, Optional
+from typing import List, Optional, Tuple
+
 
 class CharTokenizer:
     """
@@ -31,6 +32,9 @@ class CharTokenizer:
         return ids
 
     def batch_encode(self, texts: List[str], max_length: Optional[int] = None) -> List[List[int]]:
+        """
+        Encode a batch of texts into list of list of ids.
+        """
         return [self.encode(t, max_length=max_length) for t in texts]
 
     def decode(self, ids: List[int], strip_pad: bool = True, strip_unk: bool = True) -> str:
@@ -49,7 +53,19 @@ class CharTokenizer:
 
     @classmethod
     def from_json(cls, vocab_path: str, pad_token: str = "[PAD]", unk_token: str = "[UNK]"):
+        """
+        Load a tokenizer directly from a saved vocab.json file.
+        """
         with open(vocab_path, "r", encoding="utf-8") as f:
             vocab = json.load(f)
-        # JSON loads ints correctly; ensure keys are str->int
         return cls(vocab=vocab, pad_token=pad_token, unk_token=unk_token)
+
+
+def load_vocab(vocab_path: str, pad_token: str = "[PAD]", unk_token: str = "[UNK]") -> Tuple[dict, CharTokenizer]:
+    """
+    Helper to load vocab.json and return (vocab_dict, tokenizer).
+    """
+    with open(vocab_path, "r", encoding="utf-8") as f:
+        vocab = json.load(f)
+    tokenizer = CharTokenizer(vocab=vocab, pad_token=pad_token, unk_token=unk_token)
+    return vocab, tokenizer
