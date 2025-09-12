@@ -4,12 +4,9 @@ import json
 import pandas as pd
 from typing import List, Tuple, Dict
 
+
 def collect_texts_from_path(path: str, column: str = "Input", encoding: str = "utf-8") -> List[str]:
-    """
-    Read text content from a path:
-      - .csv -> returns list of strings from `column`
-      - .txt -> returns a list with the file content as single string
-    """
+    """Read text content from CSV or TXT file."""
     ext = os.path.splitext(path)[1].lower()
     if ext == ".csv":
         df = pd.read_csv(path, encoding=encoding)
@@ -22,6 +19,7 @@ def collect_texts_from_path(path: str, column: str = "Input", encoding: str = "u
     else:
         raise ValueError("Unsupported file type: use .csv or .txt")
 
+
 def build_vocab_from_files(
     paths: List[str],
     column: str = "Input",
@@ -31,7 +29,7 @@ def build_vocab_from_files(
     save_dir: str = ".",
 ) -> Tuple[Dict[str, int], Dict[str, str]]:
     """
-    Build a char-level vocab from the provided files. Saves `char_vocab.json`, `id2char.json`, and a debug `char_list.txt`.
+    Build a char-level vocab from files. Saves vocab, id2char, and debug char list.
     Returns (vocab, id2char).
     """
     all_chars = set()
@@ -51,7 +49,6 @@ def build_vocab_from_files(
     for i, ch in enumerate(unique_chars_sorted, start=2):
         vocab[ch] = i
 
-    # id2char: int -> char (as strings in JSON)
     id2char = {str(v): k for k, v in vocab.items()}
 
     os.makedirs(save_dir, exist_ok=True)
@@ -61,20 +58,16 @@ def build_vocab_from_files(
 
     with open(vocab_path, "w", encoding="utf-8") as f:
         json.dump(vocab, f, ensure_ascii=False, indent=2)
-
     with open(id2char_path, "w", encoding="utf-8") as f:
         json.dump(id2char, f, ensure_ascii=False, indent=2)
-
     with open(charlist_path, "w", encoding="utf-8") as f:
         for ch in unique_chars_sorted:
-            if ch == " ":
-                visible = "[SPACE]"
-            elif ch == "\t":
-                visible = "[TAB]"
-            elif ch == "\n":
-                visible = "[NEWLINE]"
-            else:
-                visible = ch
+            visible = (
+                "[SPACE]" if ch == " " else
+                "[TAB]" if ch == "\t" else
+                "[NEWLINE]" if ch == "\n" else
+                ch
+            )
             f.write(f"{visible}\n")
 
     print("==== Vocab build summary ====")
@@ -89,12 +82,15 @@ def build_vocab_from_files(
 
     return vocab, id2char
 
+
 def load_vocab(vocab_path: str) -> dict:
-    """Load saved vocab (char -> id) JSON."""
+    """Load vocab (char -> id) JSON."""
     with open(vocab_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-def save_vocab(vocab: dict, save_dir: str = "."):
+
+def save_vocab(vocab: dict, save_dir: str = ".") -> str:
+    """Save vocab (char -> id) as JSON to save_dir."""
     os.makedirs(save_dir, exist_ok=True)
     vocab_path = os.path.join(save_dir, "char_vocab.json")
     with open(vocab_path, "w", encoding="utf-8") as f:
